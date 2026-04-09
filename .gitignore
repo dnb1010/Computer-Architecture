@@ -1,0 +1,16 @@
+# ModelSim/QuestaSim
+work/
+*.mti
+*.mpf
+*.wlf
+transcript
+vsim.wlf
+*.cr.mti
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Other
+*.log
+*.bak
