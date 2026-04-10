@@ -1,8 +1,6 @@
 module risk_classifier (
     input [7:0] bpm,
-    input [1:0] arrhythmia_type, // 01: bradycardia, 10: tachycardia, 00: normal
-    input [7:0] spo2,           // Giả định từ cảm biến khác
-    input [7:0] temperature,    // Giả định từ cảm biến khác
+    input [1:0] arrhythmia_type, // Từ d_n_b: 01 (chậm), 10 (nhanh), 00 (BT)
     output reg [1:0] risk_level
 );
 
@@ -13,26 +11,24 @@ module risk_classifier (
     parameter CRITICAL = 2'b11;
 
     always @(*) begin
-        // Mặc định là bình thường
-        risk_level = NORMAL;
-
-        // 1. Kiểm tra mức NGUY HIỂM CAO (CRITICAL)
-        // Nhịp tim quá thấp/cao nghiêm trọng hoặc SpO2 cực thấp
-        if (bpm > 8'd180 || bpm < 8'd40 || (spo2 > 0 && spo2 < 8'd85)) begin
-            risk_level = CRITICAL;
-        end
-        // 2. Kiểm tra mức NGUY HIỂM (DANGER)
-        // Có rối loạn nhịp tim hoặc các chỉ số ngoài ngưỡng an toàn
-        else if (arrhythmia_type != 2'b00 || bpm > 8'd120 || bpm < 8'd50 || (spo2 > 0 && spo2 < 8'd92)) begin
-            risk_level = DANGER;
-        end
-        // 3. Kiểm tra mức CẢNH BÁO (WARNING)
-        // Nhịp tim hơi cao/thấp hoặc sốt nhẹ
-        else if (bpm > 8'd100 || bpm < 8'd60 || temperature > 8'd38) begin
-            risk_level = WARNING;
-        end
-        else begin
+        // 1. Kiểm tra trạng thái Bình thường từ d_n_b
+        if (arrhythmia_type == 2'b00 && bpm >= 8'd60 && bpm <= 8'd100) begin
             risk_level = NORMAL;
+        end
+        // 2. Nếu có bất thường, đánh giá mức độ nghiêm trọng dựa trên số BPM
+        else begin
+            // Mức KHẨN CẤP (Ngừng tim hoặc nhịp cực đoan)
+            if (bpm == 8'd0 || bpm > 8'd180 || bpm < 8'd40) begin
+                risk_level = CRITICAL;
+            end
+            // Mức NGUY HIỂM (Nhịp rất nhanh hoặc rất chậm)
+            else if (bpm > 8'd120 || bpm < 8'd50) begin
+                risk_level = DANGER;
+            end
+            // Mức CẢNH BÁO (Các trường hợp rối loạn nhẹ còn lại)
+            else begin
+                risk_level = WARNING;
+            end
         end
     end
 

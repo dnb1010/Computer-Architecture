@@ -3,7 +3,8 @@ module alarm_controller (
     input rst,          // Tín hiệu reset
     input [1:0] risk_level,
     output reg [1:0] led_pins, // [1]: Red, [0]: Yellow
-    output reg buzzer_pwm
+    output reg buzzer_pwm,
+    output reg sos_enable
 );
 
     // Bộ đếm chia tần cho còi (200 Hz từ 50 MHz)
@@ -13,7 +14,9 @@ module alarm_controller (
         if (rst) begin
             buzzer_pwm <= 0;
             pwm_counter <= 0;
+            sos_enable <= 0;
         end else if (risk_level >= 2'b10) begin // Nguy hiểm hoặc Khẩn cấp (Critical)
+            sos_enable <= 1;
             if (pwm_counter >= 18'd125_000) begin
                 buzzer_pwm <= ~buzzer_pwm;
                 pwm_counter <= 0;
@@ -23,6 +26,7 @@ module alarm_controller (
         end else begin
             buzzer_pwm <= 0;
             pwm_counter <= 0;
+            sos_enable <= 0;
         end
     end
 

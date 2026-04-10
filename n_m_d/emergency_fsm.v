@@ -1,6 +1,7 @@
 module emergency_fsm (
     input clk,
     input rst,
+    input ready_strobe,       // MỚI: Xung báo hiệu có nhịp tim mới từ d_n_b
     input [1:0] risk_in,      // Từ risk_classifier
     output reg [1:0] risk_out, // Đến alarm_controller
     output reg alarm_trigger
@@ -32,21 +33,30 @@ module emergency_fsm (
         next_state = current_state;
         case (current_state)
             IDLE:      next_state = MEASURING;
-            MEASURING: next_state = ANALYZING;
+            
+            MEASURING: begin
+                if (ready_strobe) // Chỉ phân tích khi d_n_b báo đã tính xong BPM
+                    next_state = ANALYZING;
+            end
+
             ANALYZING: begin
                 if (risk_in != 2'b00) 
                     next_state = COUNTING;
                 else 
                     next_state = MEASURING;
             end
+
             COUNTING:  next_state = COMPARE;
+
             COMPARE: begin
                 if (error_count >= 3'd3) // 4 lần bất thường liên tiếp (0, 1, 2, 3)
                     next_state = DISPLAY;
                 else 
                     next_state = MEASURING;
             end
+
             DISPLAY:   next_state = MEASURING;
+            
             default:   next_state = IDLE;
         endcase
     end
@@ -66,7 +76,7 @@ module emergency_fsm (
                 
                 ANALYZING: begin
                     if (risk_in == 2'b00) begin
-                        error_count <= 0;
+                        error_count <= 0; // Reset bộ đếm nếu nhịp tim về bình thường
                         risk_out <= 2'b00;
                     end else begin
                         temp_risk <= risk_in;
@@ -82,8 +92,8 @@ module emergency_fsm (
                 end
                 
                 MEASURING: begin
-                    // Có thể reset risk_out nếu về bình thường
-                    if (risk_in == 2'b00) risk_out <= 2'b00;
+                    // Giữ nguyên trạng thái cũ cho đến khi có kết quả mới
+                    if (ready_strobe && risk_in == 2'b00) risk_out <= 2'b00;
                 end
             endcase
         end
