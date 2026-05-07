@@ -1,7 +1,7 @@
 module adc_simulator (
     input  wire clk,        // Xung nhịp hệ thống (Ví dụ: 50 MHz)
     input  wire rst_n,      // Nút Reset (tích cực thấp - bấm để reset)
-    output reg  [9:0] ecg_out // Dữ liệu nhịp tim 10-bit xuất ra
+    output reg  [9:0] ecg_out, // Dữ liệu nhịp tim 10-bit xuất ra
     output wire sample_tick
 );
 
@@ -27,7 +27,7 @@ module adc_simulator (
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             clk_div_cnt <= 0;
-        end else if (tick_360Hz) begin
+        end else if (sample_tick) begin
             clk_div_cnt <= 0; // Đếm đến đỉnh thì reset về 0
         end else begin
             clk_div_cnt <= clk_div_cnt + 1; // Tăng dần bộ đếm
@@ -42,7 +42,7 @@ module adc_simulator (
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             address <= 0; // Khởi động lại từ đầu sóng khi reset
-        end else if (tick_360Hz) begin
+        end else if (sample_tick) begin
             // Vì address là 10-bit, khi cộng 1 vào 1023 (1111111111) 
             // nó sẽ tự động tràn về 0 (0000000000), tạo thành vòng lặp liên tục.
             address <= address + 1; 
