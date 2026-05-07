@@ -56,7 +56,7 @@ module tb_emergency_system;
         .clk           (clk),
         .rst           (rst),
         .risk_level    (risk_out_wire),
-        .led_pins      (led_pins),
+        .led_warn      (led_pins),
         .buzzer_pwm    (buzzer_pwm),
         .sos_enable    (sos_enable)
     );
@@ -140,6 +140,8 @@ module tb_emergency_system;
     // --------------------------------------------------------
     initial begin
         // Khoi tao
+        $dumpfile("wave.vcd");        
+        $dumpvars(0, tb_emergency_system); 
         test_pass   = 0;
         test_fail   = 0;
         total_tests = 0;
