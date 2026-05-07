@@ -36,6 +36,7 @@ module heart_monitor_top (
     // Pipeline 3 -> Đầu ra
     wire [1:0] risk_level;
     wire       sos_enable;
+    wire       alarm_trigger_w; // Dây nối mới cho alarm_trigger
 
     // =======================================================
     // 2. KẾT NỐI PIPELINE 1
@@ -43,38 +44,41 @@ module heart_monitor_top (
     
     // Giả lập ADC
     adc_simulator u_adc (
-        .clk(clk), .rst_n(rst_n),
+        .clk(clk), 
+        .rst_n(rst_n),
+        .sample_tick(sample_tick),
         .ecg_out(raw_ecg)
-        // Lưu ý: Cần thêm output tick_360Hz vào module gốc của Người 1
     );
-    
-    // Tạm thời tạo sample_tick nếu module Người 1 chưa có output này
-    reg [17:0] tick_cnt;
-    assign sample_tick = (tick_cnt == 18'd138887);
-    always @(posedge clk) tick_cnt <= (sample_tick || !rst_n) ? 0 : tick_cnt + 1;
-
+ 
     signal_normalizer u_norm (
-        .clk(clk), .rst_n(rst_n),
-        .data_in(raw_ecg), .data_out(norm_ecg)
+        .clk(clk), 
+        .rst_n(rst_n),
+        .data_in(raw_ecg), 
+        .data_out(norm_ecg)
     );
 
     moving_average_filter u_maf (
-        .clk(clk), .rst_n(rst_n),
-        .data_in(norm_ecg), .data_out(filtered_ecg)
+        .clk(clk), 
+        .rst_n(rst_n),
+        .data_in(norm_ecg), 
+        .data_out(filtered_ecg)
     );
 
     lowpass_filter u_lpf (
         .clk(clk), .rst_n(rst_n),
-        .data_en(sample_tick), .data_in(filtered_ecg), .data_out(final_ecg)
+        .data_en(sample_tick), 
+        .data_in(filtered_ecg), 
+        .data_out(final_ecg)
     );
-
-    // Dây nối cho xung đồng bộ trễ
-    reg ready_strobe_d1;
 
     // =======================================================
     // 3. KẾT NỐI PIPELINE 2
     // =======================================================
 
+    
+    // Dây nối cho xung đồng bộ trễ
+    reg ready_strobe_d1;
+    
     peak_detector u_peak (
         .clk(clk), .rst(rst),
         .sample_tick(sample_tick),
@@ -129,12 +133,14 @@ module heart_monitor_top (
         .clk(clk), .rst(rst),
         .ready_strobe(ready_strobe_d1), // DÙNG XUNG ĐÃ DELAY
         .risk_in(current_risk),
-        .risk_out(risk_level)
+        .risk_out(risk_level),
+        .alarm_trigger(alarm_trigger_w) // Kết nối chân alarm_trigger
     );
 
     alarm_controller u_alarm (
         .clk(clk), .rst(rst),
         .risk_level(risk_level),
+        .alarm_trigger(alarm_trigger_w), // Truyền tín hiệu chốt vào bộ điều khiển
         .led_pins(led_warn),
         .buzzer_pwm(buzzer),
         .sos_enable(sos_enable)
