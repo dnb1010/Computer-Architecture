@@ -37,15 +37,23 @@ module tb_top();
         integer i, j;
     begin
         for (i = 0; i < num_beats; i = i + 1) begin
-            // Đợi đến cạnh lên của clock để force, đảm bảo không miss cạnh 
-            @(posedge clk); 
-            force uut.u_peak.peak = 1; 
-            @(posedge clk); // Giữ trong đúng 1 chu kỳ clock
-            release uut.u_peak.peak;
-            
-            // Đợi khoảng cách nhịp
-            #(interval_ticks * 2777777);
-        end
+        // BƯỚC 1: Đợi đúng cạnh lên của Clock để bắt đầu nhịp
+        @(posedge clk); 
+        
+        // BƯỚC 2: Tác động vào tín hiệu đầu vào thay vì ép tín hiệu đầu ra
+        // Ép mức điện áp cao vào final_ecg để module Peak Detector tự nhận diện
+        force uut.final_ecg = 10'd800; 
+        
+        // BƯỚC 3: Giữ đúng 1 chu kỳ clock (20ns cho 50MHz)
+        @(posedge clk); 
+        
+        // BƯỚC 4: Nhả tín hiệu để hệ thống tự quay về trạng thái nền
+        release uut.final_ecg;
+        
+        // BƯỚC 5: Đợi khoảng thời gian RR-Interval
+        // (Lưu ý: Đã trừ đi 1 chu kỳ clock ở Bước 3)
+        #(interval_ticks * 2777777 - 20); 
+    end
     end
     endtask
 
