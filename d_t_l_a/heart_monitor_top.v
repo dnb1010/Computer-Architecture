@@ -8,7 +8,7 @@ module heart_monitor_top (
     output wire       uart_tx,    // Truyền dữ liệu lên PC
     output wire       sos_out,    // Tín hiệu Morse SOS
     output wire [6:0] seg,        // LED 7 đoạn (đoạn a-g)
-    output wire [3:0] an          // LED 7 đoạn (chọn vị trí led)
+    output wire [3:0] an,          // LED 7 đoạn (chọn vị trí led)
 
     output wire       lcd_rs,     // LCD Register Select
     output wire       lcd_rw,     // LCD Read/Write
