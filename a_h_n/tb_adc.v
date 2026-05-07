@@ -10,6 +10,9 @@ module tb_adc_simulator();
     wire [9:0] ecg_norm;      // Tín hiệu sau khi loại bỏ offset
     wire [9:0] ecg_filtered;  // Tín hiệu đã qua bộ lọc trung bình trượt
 
+    wire       data_en;       // Tín hiệu cho phép dữ liệu (lấy từ sample_tick của ADC)
+    wire [9:0] ecg_final;     // Tín hiệu đầu ra cuối cùng sau lọc thông thấp
+
     // ---------------------------------------------------------
     // GHÉP NỐI CÁC MODULE (PIPELINE)
     // ---------------------------------------------------------
@@ -18,6 +21,7 @@ module tb_adc_simulator();
     adc_simulator u_adc (
         .clk(clk),
         .rst_n(rst_n),
+        .sample_tick(data_en), // Nối sample_tick vào wire data_en để điều khiển các bộ lọc sau
         .ecg_out(ecg_raw)
     );
 
