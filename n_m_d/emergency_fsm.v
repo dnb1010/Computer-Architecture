@@ -103,9 +103,21 @@ module emergency_fsm (
         end
     end
 
-    // 4. Đầu ra tổ hợp
-    always @(*) begin
-        alarm_trigger = (current_state == DISPLAY);
+    // 4. Logic đầu ra chốt (Sequential Output Logic) - SỬA BUG
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            alarm_trigger <= 1'b0;
+        end else begin
+            // Kích hoạt báo động khi FSM đạt đến trạng thái DISPLAY
+            if (current_state == DISPLAY) begin
+                alarm_trigger <= 1'b1;
+            end 
+            // Tắt báo động CHỈ KHI nhịp tim đã thực sự về bình thường (risk_out == 0)
+            // Điều này đảm bảo còi/đèn không bị tắt quá sớm
+            else if (risk_out == 2'b00) begin
+                alarm_trigger <= 1'b0;
+            end
+        end
     end
 
 endmodule
