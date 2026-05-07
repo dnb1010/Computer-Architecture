@@ -10,9 +10,7 @@ module bpm_calculator (
     parameter CLK_PER_MS = 32'd50_000; // Hz
     
     // Hằng số 1 phút = 60,000ms
-    // Hằng số gộp: 60,000ms * 50,000 pulses/ms = 3,000,000,000
-    // Lưu ý: Số này cần 32-bit để chứa (max 2^32 ~ 4.2 tỷ)
-    parameter TOTAL_FACTOR = 32'd3_000_000_000;
+    parameter FACTOR_REDUCED = 32'd3_000_000;
 
     always @(posedge clk or posedge rst) begin
         if (rst) begin
@@ -25,10 +23,10 @@ module bpm_calculator (
 
             // 2. Tính BPM = 60,000 / rr_ms
             // Kiểm tra tránh chia cho 0 hoặc nhịp tim phi thực tế (<30 BPM hoặc >250 BPM)
-            if (rr_interval > (CLK_PER_MS * 240) && rr_interval < (CLK_PER_MS * 2000)) begin // RR > 240ms (~250 BPM)
-                bpm <= TOTAL_FACTOR / rr_interval; // Phép chia duy nhất, ít sai số
+            if (rr_interval > 32'd12_000_000 && rr_interval < 32'd100_000_000) begin // RR > 240ms (~250 BPM)
+                bpm <= FACTOR_REDUCED / (rr_interval / 10'd1000);
             end else begin
-                bpm <= 0; // Tín hiệu nhiễu hoặc không hợp lệ
+                bpm <= 8'd0; // Tín hiệu nhiễu hoặc không hợp lệ
             end
         end
     end
