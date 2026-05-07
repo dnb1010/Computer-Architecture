@@ -37,14 +37,14 @@ module tb_top();
         integer i, j;
     begin
         for (i = 0; i < num_beats; i = i + 1) begin
-            // Tạo 1 đỉnh nhịp tim (Peak)
+            // Đợi đến cạnh lên của clock để force, đảm bảo không miss cạnh 
+            @(posedge clk); 
             force uut.u_peak.peak = 1; 
-            #20; 
+            @(posedge clk); // Giữ trong đúng 1 chu kỳ clock
             release uut.u_peak.peak;
             
-            // Đợi khoảng cách giữa các nhịp
-            // (Mỗi tick 360Hz ~ 2,777,777 ns)
-            #(interval_ticks * 2777777); 
+            // Đợi khoảng cách nhịp
+            #(interval_ticks * 2777777);
         end
     end
     endtask
