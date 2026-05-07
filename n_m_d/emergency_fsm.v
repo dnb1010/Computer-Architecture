@@ -89,11 +89,15 @@ module emergency_fsm (
                 
                 DISPLAY: begin
                     risk_out <= temp_risk;
+                    error_count <= 0;
                 end
                 
                 MEASURING: begin
                     // Giữ nguyên trạng thái cũ cho đến khi có kết quả mới
-                    if (ready_strobe && risk_in == 2'b00) risk_out <= 2'b00;
+                    if (ready_strobe && risk_in == 2'b00) begin
+                        risk_out <= 2'b00;
+                        error_count <= 0;
+                    end
                 end
             endcase
         end
