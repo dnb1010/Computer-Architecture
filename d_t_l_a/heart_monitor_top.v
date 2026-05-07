@@ -151,6 +151,7 @@ module heart_monitor_top (
     uart_transmitter u_uart (
         .clk(clk), .rst(rst),
         .data_in(bpm_value),
+        .start_tx(ready_strobe),
         .tx_out(uart_tx)
     );
 
