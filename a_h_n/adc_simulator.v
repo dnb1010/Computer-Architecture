@@ -2,6 +2,7 @@ module adc_simulator (
     input  wire clk,        // Xung nhịp hệ thống (Ví dụ: 50 MHz)
     input  wire rst_n,      // Nút Reset (tích cực thấp - bấm để reset)
     output reg  [9:0] ecg_out // Dữ liệu nhịp tim 10-bit xuất ra
+    output wire sample_tick
 );
 
     // =======================================================
@@ -19,8 +20,10 @@ module adc_simulator (
     // =======================================================
     // Tính toán: 50,000,000 / 360 - 1 = 138888
     reg [17:0] clk_div_cnt; // 18-bit đủ chứa số 138888
-    wire tick_360Hz = (clk_div_cnt == 138887); // Báo hiệu đến lúc xuất mẫu mới
-
+    
+    // Gán tín hiệu tick nội bộ ra cổng output mới
+    assign sample_tick = (clk_div_cnt == 18'd138887);
+    
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             clk_div_cnt <= 0;
