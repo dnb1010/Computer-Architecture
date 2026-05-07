@@ -147,7 +147,7 @@ module heart_monitor_top (
         .clk(clk), .rst(rst),
         .risk_level(risk_level),
         .alarm_trigger(alarm_trigger_w), // Truyền tín hiệu chốt vào bộ điều khiển
-        .led_pins(led_warn),
+        .led_warn(led_warn),
         .buzzer_pwm(buzzer),
         .sos_enable(sos_enable)
     );
