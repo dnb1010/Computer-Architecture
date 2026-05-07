@@ -11,6 +11,13 @@ module tb_top();
     wire [6:0] seg;
     wire [3:0] an;
 
+    wire       lcd_rs;
+    wire       lcd_rw;
+    wire       lcd_en;
+    wire [7:0] lcd_data;
+    wire [7:0] matrix_row;
+    wire [7:0] matrix_col;
+    
     // 2. Gọi module Top-level
     heart_monitor_top uut (
         .clk(clk),
@@ -20,7 +27,13 @@ module tb_top();
         .uart_tx(uart_tx),
         .sos_out(sos_out),
         .seg(seg),
-        .an(an)
+        .an(an),
+        .lcd_rs(lcd_rs),
+        .lcd_rw(lcd_rw),
+        .lcd_en(lcd_en),
+        .lcd_data(lcd_data),
+        .matrix_row(matrix_row),
+        .matrix_col(matrix_col)
     );
 
     // 3. Tạo xung Clock 50MHz (Chu kỳ 20ns)
@@ -53,7 +66,7 @@ module tb_top();
         // BƯỚC 5: Đợi khoảng thời gian RR-Interval
         // (Lưu ý: Đã trừ đi 1 chu kỳ clock ở Bước 3)
         #(interval_ticks * 2777777 - 20); 
-    end
+        end
     end
     endtask
 
