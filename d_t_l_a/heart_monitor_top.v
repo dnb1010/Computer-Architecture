@@ -68,6 +68,9 @@ module heart_monitor_top (
         .data_en(sample_tick), .data_in(filtered_ecg), .data_out(final_ecg)
     );
 
+    // Dây nối cho xung đồng bộ trễ
+    reg ready_strobe_d1;
+
     // =======================================================
     // 3. KẾT NỐI PIPELINE 2
     // =======================================================
@@ -95,6 +98,13 @@ module heart_monitor_top (
         .bpm(bpm_value)
     );
 
+    // Tạo delay 1 chu kỳ clock cho ready_strobe
+    // Đợi bpm_value ổn định từ thanh ghi của u_bpm
+    always @(posedge clk or posedge rst) begin
+        if (rst) ready_strobe_d1 <= 1'b0;
+        else     ready_strobe_d1 <= ready_strobe;
+    end
+    
     // =======================================================
     // 4. KẾT NỐI PIPELINE 3
     // =======================================================
@@ -102,7 +112,7 @@ module heart_monitor_top (
     arrhythmia_detector u_arr (
         .clk(clk), .rst(rst),
         .bpm(bpm_value),
-        .ready_strobe(ready_strobe),
+        .ready_strobe(ready_strobe_d1), // DÙNG XUNG ĐÃ DELAY
         .abnormal(abnormal),
         .type(arrhythmia_type)
     );
@@ -117,7 +127,7 @@ module heart_monitor_top (
 
     emergency_fsm u_fsm (
         .clk(clk), .rst(rst),
-        .ready_strobe(ready_strobe),
+        .ready_strobe(ready_strobe_d1), // DÙNG XUNG ĐÃ DELAY
         .risk_in(current_risk),
         .risk_out(risk_level)
     );
