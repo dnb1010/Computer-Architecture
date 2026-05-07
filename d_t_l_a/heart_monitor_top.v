@@ -9,6 +9,13 @@ module heart_monitor_top (
     output wire       sos_out,    // Tín hiệu Morse SOS
     output wire [6:0] seg,        // LED 7 đoạn (đoạn a-g)
     output wire [3:0] an          // LED 7 đoạn (chọn vị trí led)
+
+    output wire       lcd_rs,     // LCD Register Select
+    output wire       lcd_rw,     // LCD Read/Write
+    output wire       lcd_en,     // LCD Enable
+    output wire [7:0] lcd_data,   // LCD Data Bus
+    output wire [7:0] matrix_row, // LED Matrix Rows
+    output wire [7:0] matrix_col  // LED Matrix Columns
 );
 
     // =======================================================
@@ -74,7 +81,6 @@ module heart_monitor_top (
     // =======================================================
     // 3. KẾT NỐI PIPELINE 2
     // =======================================================
-
     
     // Dây nối cho xung đồng bộ trễ
     reg ready_strobe_d1;
@@ -167,8 +173,34 @@ module heart_monitor_top (
     uart_transmitter u_uart (
         .clk(clk), .rst(rst),
         .data_in(bpm_value),
-        .start_tx(ready_strobe),
+        .start_tx(ready_strobe_d1),
         .tx_out(uart_tx)
     );
 
+    // Khởi tạo RAM Logger (Lưu lịch sử dữ liệu)
+    ram_logger u_logger (
+        .clk(clk), .rst(rst),
+        .write_en(ready_strobe_d1),
+        .bpm_in(bpm_value),
+        .risk_in(risk_level)
+    );
+
+    // Khởi tạo LCD Controller
+    lcd_controller u_lcd (
+        .clk(clk), .rst(rst),
+        .risk_level(risk_level),
+        .lcd_rs(lcd_rs), 
+        .lcd_rw(lcd_rw), 
+        .lcd_en(lcd_en), 
+        .lcd_data(lcd_data)
+    );
+
+    // Khởi tạo LED Matrix Waveform (Vẽ biểu đồ nhịp tim)
+    led_matrix_waveform u_matrix (
+        .clk(clk), .rst(rst),
+        .sample_tick(sample_tick),
+        .ecg_signal(final_ecg),
+        .row_pins(matrix_row),
+        .col_pins(matrix_col)
+    );
 endmodule
