@@ -2,11 +2,14 @@ module alarm_controller (
     input clk,          // 50 MHz
     input rst,          // Tín hiệu reset
     input [1:0] risk_level,
-    input  wire       alarm_trigger, 
-    output reg [1:0] led_pins, // [1]: Red, [0]: Yellow
+    input  wire alarm_trigger, 
+    output wire [1:0] led_warn,
     output reg buzzer_pwm,
     output reg sos_enable
 );
+
+    reg [1:0] led_pins;
+    assign led_warn = led_pins;
 
     // Bộ đếm chia tần cho còi (200 Hz từ 50 MHz)
     // Giới hạn đếm = 50,000,000 / 200 / 2 (để toggle) = 125,000
@@ -18,7 +21,7 @@ module alarm_controller (
             sos_enable <= 0;
         end else begin 
         // 1. SOS chỉ được phép kích hoạt khi ở mức CRITICAL (2'b11)
-            if (risk_level == 2'b11) 
+            if (risk_level >= 2'b10) 
                 sos_enable <= 1'b1;
             else 
                 sos_enable <= 1'b0;
