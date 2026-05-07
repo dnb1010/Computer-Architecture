@@ -15,18 +15,24 @@ module alarm_controller (
             buzzer_pwm <= 0;
             pwm_counter <= 0;
             sos_enable <= 0;
-        end else if (risk_level >= 2'b10) begin // Nguy hiểm hoặc Khẩn cấp (Critical)
-            sos_enable <= 1;
-            if (pwm_counter >= 18'd125_000) begin
-                buzzer_pwm <= ~buzzer_pwm;
-                pwm_counter <= 0;
+        end else begin 
+        // 1. SOS chỉ được phép kích hoạt khi ở mức CRITICAL (2'b11)
+            if (risk_level == 2'b11) 
+                sos_enable <= 1'b1;
+            else 
+                sos_enable <= 1'b0;
+        // 2. Còi (Buzzer) kêu cho cả DANGER (2'b10) và CRITICAL (2'b11)
+            if (risk_level >= 2'b10) begin
+                if (pwm_counter >= 18'd125_000) begin
+                    buzzer_pwm <= ~buzzer_pwm;
+                    pwm_counter <= 0;
+                end else begin
+                    pwm_counter <= pwm_counter + 1;
+                end
             end else begin
-                pwm_counter <= pwm_counter + 1;
+                buzzer_pwm <= 0;
+                pwm_counter <= 0;
             end
-        end else begin
-            buzzer_pwm <= 0;
-            pwm_counter <= 0;
-            sos_enable <= 0;
         end
     end
 
