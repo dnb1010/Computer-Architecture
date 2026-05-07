@@ -2,6 +2,7 @@ module alarm_controller (
     input clk,          // 50 MHz
     input rst,          // Tín hiệu reset
     input [1:0] risk_level,
+    input  wire       alarm_trigger, 
     output reg [1:0] led_pins, // [1]: Red, [0]: Yellow
     output reg buzzer_pwm,
     output reg sos_enable
