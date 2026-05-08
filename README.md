@@ -24,7 +24,7 @@ Toàn bộ được viết bằng **Verilog HDL**, mô phỏng bằng **Icarus V
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    heart_monitor_top.v                       │
+│                    heart_monitor_top.v                      │
 │                                                             │
 │  ┌──────────────┐    ┌───────────────────────────────────┐  │
 │  │  PIPELINE 1  │    │          PIPELINE 2               │  │
@@ -38,10 +38,10 @@ Toàn bộ được viết bằng **Verilog HDL**, mô phỏng bằng **Icarus V
 │  │      │       │    │      │                            │  │
 │  │ lowpass_filt ├────► arrhythmia_detector               │  │
 │  └──────────────┘    └────────────┬──────────────────────┘  │
-│                                   │                          │
+│                                   │                         │
 │                      ┌────────────▼──────────────────────┐  │
-│                      │        PIPELINE 3                  │  │
-│                      │        (Người 3)                   │  │
+│                      │        PIPELINE 3                 │  │
+│                      │        (Người 3)                  │  │
 │                      │                                   │  │
 │                      │  risk_classifier                  │  │
 │                      │        │                          │  │
@@ -54,12 +54,12 @@ Toàn bộ được viết bằng **Verilog HDL**, mô phỏng bằng **Icarus V
 │                      │        │                          │  │
 │                      │  sos_signal_generator             │  │
 │                      └────────┬──────────────────────────┘  │
-│                               │                              │
+│                               │                             │
 │              ┌────────────────▼──────────────────────────┐  │
-│              │              OUTPUT                        │  │
-│              │  LED 7-seg │ UART │ LCD │ LED Matrix       │  │
-│              │  Buzzer    │ SOS  │ RAM Logger             │  │
-│              └────────────────────────────────────────────┘  │
+│              │              OUTPUT                       │  │
+│              │  LED 7-seg │ UART │ LCD │ LED Matrix      │  │
+│              │  Buzzer    │ SOS  │ RAM Logger            │  │
+│              └───────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -70,8 +70,8 @@ Toàn bộ được viết bằng **Verilog HDL**, mô phỏng bằng **Icarus V
                 ▲              │ (normal)     │           │
                 │              ▼              │    (cnt<3)│
                 └──────── MEASURING ◄─────────┘           │
-                               ▲                    (cnt≥3)│
-                               └──────── DISPLAY ◄─────────┘
+                               ▲                   (cnt≥3)│
+                               └─────── DISPLAY ◄─────────┘
 ```
 
 | Trạng thái  | Mô tả |
@@ -87,17 +87,16 @@ Toàn bộ được viết bằng **Verilog HDL**, mô phỏng bằng **Icarus V
 
 ## 🧰 Technology Stack
 
-| Thành phần | Chi tiết |
-|------------|----------|
-| Ngôn ngữ HDL | Verilog 2001 |
-| Trình biên dịch | [Icarus Verilog](http://iverilog.icarus.com/) (iverilog) ≥ v10 |
-| Xem dạng sóng | [GTKWave](https://gtkwave.sourceforge.net/) |
-| Clock hệ thống | 50 MHz |
-| Reset | Tích cực thấp (`rst_n`) cho Pipeline 1; tích cực cao (`rst`) cho Pipeline 2 & 3 |
-| Dữ liệu ECG | ROM 1024 mẫu × 10-bit (`ecg_rom.mem`) |
-| UART Baudrate | 9600 bps |
+|   Thành phần    |                                        Chi tiết                                 |
+|-----------------|---------------------------------------------------------------------------------|
+|  Ngôn ngữ HDL   |                                      Verilog 2001                               |
+| Trình biên dịch |          [Icarus Verilog](http://iverilog.icarus.com/) (iverilog) ≥ v10         |
+|  Xem dạng sóng  |                     [GTKWave](https://gtkwave.sourceforge.net/)                 |
+|  Clock hệ thống |                                         50 MHz                                  |
+|      Reset      | Tích cực thấp (`rst_n`) cho Pipeline 1; tích cực cao (`rst`) cho Pipeline 2 & 3 |
+|   Dữ liệu ECG   |                           ROM 1024 mẫu × 10-bit (`ecg_rom.mem`)                 |
+|  UART Baudrate  |                                        9600 bps                                 |
 
----
 
 ## ✨ Features
 
@@ -301,23 +300,35 @@ gtkwave wave.vcd
 **Kỳ vọng** (in ra terminal):
 ```
 ======================================================
-  UNIT TEST: EMERGENCY FSM + ALARM CONTROLLER
+UNIT TEST: EMERGENCY FSM + ALARM CONTROLLER
 ======================================================
 
 --- KICH BAN 1: BINH THUONG (75 BPM) ---
-  [PASS] risk_out = NORMAL(00) | got=0 (exp=0)
-  [PASS] alarm_trigger = OFF   | got=0 (exp=0)
-  [PASS] sos_enable = OFF      | got=0 (exp=0)
-  [PASS] buzzer = OFF          | got=0 (exp=0)
+>> T=216000  | BPM= 75 | arr=00 | risk_in=00 | risk_out=00 | alarm=0 | LED=00 | buzzer=0 | sos_en=0
+>> T=1256000 | BPM= 75 | arr=00 | risk_in=00 | risk_out=00 | alarm=0 | LED=00 | buzzer=0 | sos_en=0
+>> T=2296000 | BPM= 75 | arr=00 | risk_in=00 | risk_out=00 | alarm=0 | LED=00 | buzzer=0 | sos_en=0
+>> T=3336000 | BPM= 75 | arr=00 | risk_in=00 | risk_out=00 | alarm=0 | LED=00 | buzzer=0 | sos_en=0
+>> T=4376000 | BPM= 75 | arr=00 | risk_in=00 | risk_out=00 | alarm=0 | LED=00 | buzzer=0 | sos_en=0
+>> T=5416000 | BPM= 75 | arr=00 | risk_in=00 | risk_out=00 | alarm=0 | LED=00 | buzzer=0 | sos_en=0
+Ket qua sau 6 nhip binh thuong:
+[PASS] out = NORMAL(00) | got=0 (exp=0)
+[PASS] rm_trigger = OFF | got=0 (exp=0)
+[PASS] sos_enable = OFF | got=0 (exp=0)
+[PASS] buzzer = OFF | got=0 (exp=0)
 
 --- KICH BAN 2: NHIP NHANH (130 BPM) -> DANGER ---
-  [PASS] risk_in = DANGER(10)  | got=2 (exp=2)
-  [PASS] risk_out = DANGER(10) | got=2 (exp=2)
-  [PASS] sos_enable = ON       | got=1 (exp=1)
-  [PASS] Buzzer/SOS kich hoat  | got=1 (exp=1)
+>> T=6856000 | BPM=130 | arr=10 | risk_in=10 | risk_out=00 | alarm=0 | LED=00 | buzzer=0 | sos_en=0
+>> T=7896000 | BPM=130 | arr=10 | risk_in=10 | risk_out=00 | alarm=0 | LED=00 | buzzer=0 | sos_en=0
+>> T=8936000 | BPM=130 | arr=10 | risk_in=10 | risk_out=00 | alarm=0 | LED=00 | buzzer=0 | sos_en=0
+>> T=9976000 | BPM=130 | arr=10 | risk_in=10 | risk_out=10 | alarm=1 | LED=00 | buzzer=0 | sos_en=1
+Ket qua sau 4 nhip nhanh (130 BPM):
+[PASS] 0) tu classifier | got=2 (exp=2)
+[PASS] (10) sau 3+ nhip | got=2 (exp=2)
+[PASS] = ON khi DANGER | got=1 (exp=1)
+[PASS] er/SOS kich hoat | got=1 (exp=1)
 ...
-  KET QUA: 14/14 test PASS | 0 FAIL
-  >> TAT CA TEST DA QUA! <<
+KET QUA: 18/18 test PASS | 0 FAIL
+>> TAT CA TEST DA QUA! <<
 ```
 
 ---
@@ -326,32 +337,13 @@ gtkwave wave.vcd
 
 ```bash
 # Biên dịch toàn bộ
-iverilog -o sim_top \
-  d_t_l_a/tb_top.v \
-  d_t_l_a/heart_monitor_top.v \
-  a_h_n/adc_simulator.v \
-  a_h_n/signal_normalizer.v \
-  a_h_n/moving_average_filter.v \
-  a_h_n/lowpass_filter.v \
-  d_n_b/peak_detector.v \
-  d_n_b/rr_interval_counter.v \
-  d_n_b/bpm_calculator.v \
-  d_n_b/arrhythmia_detector.v \
-  n_m_d/risk_classifier.v \
-  n_m_d/emergency_fsm.v \
-  n_m_d/alarm_controller.v \
-  n_m_d/sos_signal_generator.v \
-  d_t_l_a/seven_segment_driver.v \
-  d_t_l_a/uart_transmitter.v \
-  d_t_l_a/lcd_controller.v \
-  d_t_l_a/led_matrix_waveform.v \
-  d_t_l_a/ram_logger.v
+iverilog -o sim_top -s tb_emergency_system */*.v
 
 # Chạy
 vvp sim_top
 
 # Xem sóng
-gtkwave wave.vcd  # (nếu tb_top.v có $dumpfile)
+gtkwave wave.vcd
 ```
 
 ---
