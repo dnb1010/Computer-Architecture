@@ -1,3 +1,14 @@
+# Input: tín hiệu điện tâm đồ (ECG) thô
+Định dạng: Tín hiệu số (Digital signal).
+  
+  1. Độ phân giải biên độ: 
+    Độ phân giải: 11-bit.
+    Giá trị cụ thể: Tín hiệu được số hóa trong khoảng giá trị từ 0 đến 2047.
+    ADC Gain (Hệ số khuếch đại): 200 adu/mV (adu là viết tắt của analog-to-digital unit). Điều này có nghĩa là cứ mỗi 200 đơn vị trong dữ liệu số tương ứng với 1mV điện áp thực tế từ tim.
+  2. Độ phân giải thời gian (Tần số lấy mẫu)
+    Sampling Frequency ($f_s$): 360 Hz.
+    Ý nghĩa: Cứ mỗi giây, hệ thống của bạn sẽ nhận được 360 mẫu dữ liệu. Khoảng cách giữa hai mẫu liên tiếp là khoảng $2.78$ ms.
+  3. Cổng giao tiếp (Port): Trong code Verilog của bạn, input chính là biến data_in (hoặc tên tương đương) đi kèm với các tín hiệu điều khiển như clk (clock) và rst_n (reset).
 # 🫀 ECG Heart Monitor — FPGA System
 
 > Hệ thống theo dõi nhịp tim thời gian thực trên FPGA, phát hiện loạn nhịp và cảnh báo khẩn cấp bằng tín hiệu Morse SOS.
