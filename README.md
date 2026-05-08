@@ -337,5 +337,3 @@ ecg_rom.mem (1024 mẫu hex)
 - **Không có top-level testbench tích hợp:** Hai pipeline chỉ được test riêng lẻ, chưa có kịch bản test end-to-end từ ROM đến cảnh báo loạn nhịp.
 
 ---
-
-*Báo cáo được tạo tự động · Computer-Architecture-main · ECG Verilog Project*
