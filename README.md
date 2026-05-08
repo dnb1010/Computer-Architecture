@@ -134,7 +134,7 @@ Toàn bộ được viết bằng **Verilog HDL**, mô phỏng bằng **Icarus V
 ## 📁 Project Structure
 
 ```
-project/
+Computer-Architecture/
 │
 ├── a_h_n/                        # Người 1 — Xử lý tín hiệu ADC
 │   ├── adc_simulator.v           # Giả lập ADC từ ROM, xuất sample_tick 360 Hz
@@ -214,7 +214,7 @@ sudo dnf install iverilog gtkwave
 
 ```bash
 git clone <repository-url>
-cd ecg-heart-monitor
+cd Computer-Architecture
 ```
 
 Hoặc tải ZIP → giải nén → mở terminal trong thư mục dự án.
