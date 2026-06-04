@@ -14,7 +14,7 @@ module sos_signal_generator (
             clk_div <= 0;
             slow_clk <= 0;
         end else begin
-            if (clk_div >= 24'd10_000_000) begin
+            if (clk_div >= 24'd5_000_000) begin
                 clk_div <= 0;
                 slow_clk <= ~slow_clk;
             end else begin
