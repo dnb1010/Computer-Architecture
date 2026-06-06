@@ -11,6 +11,22 @@ vsim.wlf
 .DS_Store
 Thumbs.db
 
+# Icarus Verilog simulation binaries
+sim
+sim_*
+
+# Waveform files
+*.vcd
+*.fst
+*.lxt
+*.lxt2
+
+# GTKWave config
+*.gtkw
+
 # Other
 *.log
 *.bak
+
+*.vcd
+*.vvp
