@@ -5,6 +5,8 @@ module sos_signal_generator (
     output reg sos_out
 );
 
+    parameter CLK_DIV_MAX = 24'd4_999_999; // Thực tế: 0.1s @ 50MHz
+
     // -------------------------------------------------------
     // Bộ chia tần: toggle slow_clk mỗi 5,000,000 chu kỳ
     // → chu kỳ slow_clk = 10,000,000 chu kỳ clk = 0.2s
@@ -17,7 +19,7 @@ module sos_signal_generator (
             clk_div  <= 24'd0;
             slow_clk <= 1'b0;
         end else begin
-            if (clk_div >= 24'd4_999_999) begin
+            if (clk_div >= CLK_DIV_MAX) begin
                 clk_div  <= 24'd0;
                 slow_clk <= ~slow_clk;
             end else begin
