@@ -61,7 +61,7 @@ module tb_emergency_system;
         .sos_enable    (sos_enable)
     );
 
-    sos_signal_generator #(.CLK_DIV_MAX(24'd4)) u_sos (
+    sos_signal_generator u_sos (
         .clk           (clk),
         .rst           (rst),
         .enable        (sos_enable),
