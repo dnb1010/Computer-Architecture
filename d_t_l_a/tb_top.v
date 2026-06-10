@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
 module tb_top();
-    // 1. Khai báo các tín hiệu kết nối với Top-level
+    // 1. Tín hiệu kết nối
     reg clk;
     reg rst_n;
     wire [1:0] led_warn;
@@ -10,99 +10,112 @@ module tb_top();
     wire       sos_out;
     wire [6:0] seg;
     wire [3:0] an;
-
     wire       lcd_rs;
     wire       lcd_rw;
     wire       lcd_en;
     wire [7:0] lcd_data;
     wire [7:0] matrix_row;
     wire [7:0] matrix_col;
-    
-    // 2. Gọi module Top-level
+
+    // Biến thống kê
+    integer test_pass = 0;
+    integer test_fail = 0;
+    integer total_tests = 0;
+
+    // 2. Module Top-level
     heart_monitor_top uut (
-        .clk(clk),
-        .rst_n(rst_n),
-        .led_warn(led_warn),
-        .buzzer(buzzer),
-        .uart_tx(uart_tx),
-        .sos_out(sos_out),
-        .seg(seg),
-        .an(an),
-        .lcd_rs(lcd_rs),
-        .lcd_rw(lcd_rw),
-        .lcd_en(lcd_en),
-        .lcd_data(lcd_data),
-        .matrix_row(matrix_row),
-        .matrix_col(matrix_col)
+        .clk(clk), .rst_n(rst_n), .led_warn(led_warn), .buzzer(buzzer),
+        .uart_tx(uart_tx), .sos_out(sos_out), .seg(seg), .an(an),
+        .lcd_rs(lcd_rs), .lcd_rw(lcd_rw), .lcd_en(lcd_en), .lcd_data(lcd_data),
+        .matrix_row(matrix_row), .matrix_col(matrix_col)
     );
 
-    // 3. Tạo xung Clock 50MHz (Chu kỳ 20ns)
+    // 3. Monitor: Tự động in log mỗi khi có nhịp tim mới
+    // Truy cập trực tiếp vào bên trong uut để lấy dữ liệu
+    always @(posedge uut.ready_strobe_d1) begin
+        #5; 
+        $display(" >> T=%0t | BPM=%0d | Risk_in=%b | Risk_out=%b | SOS_en=%b | Alarm=%b",
+         $time, uut.bpm_value, uut.u_class.risk_level, uut.u_fsm.risk_out, uut.u_sos.enable, uut.u_fsm.alarm_trigger);
+    end
+
+    // Task kiểm tra
+    task check;
+        input [63:0] actual;
+        input [63:0] expected;
+        input [127:0] msg; 
+    begin
+        total_tests = total_tests + 1;
+        if (actual === expected) begin
+            $display("  [PASS] %s | got=%0d (exp=%0d)", msg, actual, expected);
+            test_pass = test_pass + 1;
+        end else begin
+            $display("  [FAIL] %s | got=%0d (exp=%0d)", msg, actual, expected);
+            test_fail = test_fail + 1;
+        end
+    end
+    endtask
+
+    // 4. Clock
     initial begin
         clk = 0;
         forever #10 clk = ~clk;
     end
 
-    // 4. Task giả lập nhịp tim
-    // interval_ticks: Khoảng cách giữa các đỉnh (tính bằng tick 360Hz)
+// ... (các phần khai báo giữ nguyên)
+
+    // 4. Task giả lập nhịp tim (Đã thêm biến bpm để in log)
     task simulate_heartbeat;
+        input [7:0] bpm;            // Thêm tham số BPM
         input integer interval_ticks;
         input integer num_beats;
-        integer i, j;
+        integer i;
     begin
+        $display(">>> Dang kich ban: %0d BPM", bpm); // In ra log ngay khi bắt đầu kịch bản
         for (i = 0; i < num_beats; i = i + 1) begin
-        // BƯỚC 1: Đợi đúng cạnh lên của Clock để bắt đầu nhịp
-        @(posedge clk); 
-        
-        // BƯỚC 2: Tác động vào tín hiệu đầu vào thay vì ép tín hiệu đầu ra
-        // Ép mức điện áp cao vào final_ecg để module Peak Detector tự nhận diện
-        force uut.final_ecg = 10'd800; 
-        
-        // BƯỚC 3: Giữ đúng 1 chu kỳ clock (20ns cho 50MHz)
-        @(posedge clk); 
-        
-        // BƯỚC 4: Nhả tín hiệu để hệ thống tự quay về trạng thái nền
-        release uut.final_ecg;
-        
-        // BƯỚC 5: Đợi khoảng thời gian RR-Interval
-        // (Lưu ý: Đã trừ đi 1 chu kỳ clock ở Bước 3)
-        #(interval_ticks * 2777777 - 20); 
+            @(posedge clk);
+            force uut.final_ecg = 10'd800;
+            @(posedge clk);
+            release uut.final_ecg;
+            #(interval_ticks * 2777777 - 20);
         end
     end
     endtask
 
     // 5. Kịch bản mô phỏng 4 trạng thái
     initial begin
-        // Khởi tạo
-        rst_n = 0;
-        #100;
-        rst_n = 1;
-        $display("--- BAT DAU KIEM TRA 4 KICH BAN ---");
+        rst_n = 0; #100; rst_n = 1;
+        $display("======================================================");
+        $display("  UNIT TEST: HEART MONITOR TOP LEVEL INTEGRATION");
+        $display("======================================================");
 
-        // TH1: BÌNH THƯỜNG (~75 BPM)
-        // 75 BPM -> RR = 800ms -> ~288 ticks
-        $display("Kich ban 1: Binh thuong (75 BPM)");
-        simulate_heartbeat(288, 5);
+        // Kịch bản 1: Bình thường (75 BPM)
+        simulate_heartbeat(75, 288, 6);
         #1000000;
+        check(uut.u_fsm.risk_out, 2'b00, "Kich ban 1 (75BPM): Risk=NORMAL");
+        check(uut.u_fsm.alarm_trigger, 1'b0, "Kich ban 1: Alarm=OFF");
+        $display("");
 
-        // TH2: NHỊP NHANH (>120 BPM)
-        // 130 BPM -> RR = 461ms -> ~166 ticks
-        $display("Kich ban 2: Nhip nhanh (130 BPM)");
-        simulate_heartbeat(166, 5);
+        // Kịch bản 2: Nhịp nhanh (130 BPM)
+        simulate_heartbeat(130, 166, 4);
         #1000000;
+        check(uut.u_fsm.risk_out, 2'b10, "Kich ban 2 (130BPM): Risk=DANGER");
+        check(uut.u_sos.enable, 1'b1, "Kich ban 2: SOS Active");
+        $display("");
 
-        // TH3: NGUY HIỂM (>150 BPM)
-        // 160 BPM -> RR = 375ms -> ~135 ticks
-        $display("Kich ban 3: Nguy hiem (160 BPM)");
-        simulate_heartbeat(135, 5);
+        // Kịch bản 3: Nguy hiểm (160 BPM)
+        simulate_heartbeat(160, 135, 4);
         #1000000;
+        check(uut.u_fsm.risk_out, 2'b10, "Kich ban 3 (160BPM): Risk=DANGER");
+        $display("");
 
-        // TH4: ĐỘT QUỴ (Nhịp hỗn loạn/SOS)
-        // Giả lập nhịp cực nhanh hoặc mất nhịp liên tục
-        $display("Kich ban 4: Dot quy (SOS)");
-        simulate_heartbeat(50, 5); 
+        // Kịch bản 4: Đột quỵ (200 BPM)
+        simulate_heartbeat(200, 50, 4);
+        #1000000;
+        check(uut.u_fsm.risk_out, 2'b11, "Kich ban 4 (200BPM): Risk=CRITICAL");
 
-        #5000000;
-        $display("--- KET THUC MO PHONG ---");
-        $finish;
+        $display("\n======================================================");
+        $display("  KET QUA: %0d/%0d test PASS | %0d FAIL", test_pass, total_tests, test_fail);
+        $display("======================================================");
+        $stop;
     end
 endmodule
