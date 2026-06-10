@@ -13,7 +13,7 @@ module  peak_detector (
     // Bộ đém khoảng trễ để tránh đa đỉnh (Refractory Counter)
     reg [7:0] deadzone_cnt; // 8 bit là đủ đếm đến 72
     // Tham số chặn 0.2s một nhịp đập với 360Hz
-    parameter DEADZONE_VAL = 8'd72;
+    parameter DEADZONE_VAL = 8'd120;
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             {p1, p2, p3} <= 0;
