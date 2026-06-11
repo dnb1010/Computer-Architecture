@@ -52,16 +52,21 @@ module tb_emergency_system;
         .alarm_trigger (alarm_trigger)
     );
 
-    alarm_controller u_alarm (
+    alarm_controller #(
+        .PWM_LIMIT(18'd5),   // Toggle mỗi 5 clock → thấy ngay trong simulation
+        .SLOW_BIT(5'd3),     // bit[3] toggle mỗi 8 clock → ~WARNING blink
+        .FAST_BIT(5'd1)      // bit[1] toggle mỗi 2 clock → ~DANGER blink nhanh hơn
+    ) u_alarm (
         .clk           (clk),
         .rst           (rst),
         .risk_level    (risk_out_wire),
+        .alarm_trigger(alarm_trigger),
         .led_warn      (led_pins),
         .buzzer_pwm    (buzzer_pwm),
         .sos_enable    (sos_enable)
     );
 
-    sos_signal_generator u_sos (
+    sos_signal_generator #(.CLK_DIV_MAX(24'd4)) u_sos (
         .clk           (clk),
         .rst           (rst),
         .enable        (sos_enable),
