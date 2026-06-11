@@ -8,6 +8,10 @@ module alarm_controller (
     output reg sos_enable
 );
 
+    parameter PWM_LIMIT   = 18'd125_000;
+    parameter SLOW_BIT    = 5'd24;
+    parameter FAST_BIT    = 5'd22;
+
     reg [1:0] led_pins;
     assign led_warn = led_pins;
 
@@ -27,7 +31,7 @@ module alarm_controller (
                 sos_enable <= 1'b0;
         // 2. Còi (Buzzer) kêu cho cả DANGER (2'b10) và CRITICAL (2'b11)
             if (risk_level >= 2'b10) begin
-                if (pwm_counter >= 18'd125_000) begin
+                if (pwm_counter >= PWM_LIMIT) begin 
                     buzzer_pwm <= ~buzzer_pwm;
                     pwm_counter <= 0;
                 end else begin
@@ -47,8 +51,8 @@ module alarm_controller (
         else blink_counter <= blink_counter + 1;
     end
 
-    wire slow_blink = blink_counter[24]; // Khoảng 1.5Hz
-    wire fast_blink = blink_counter[22]; // Khoảng 6Hz
+    wire slow_blink = blink_counter[SLOW_BIT]; 
+    wire fast_blink = blink_counter[FAST_BIT];
 
     always @(*) begin
         led_pins = 2'b00;
