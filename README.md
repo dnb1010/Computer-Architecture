@@ -346,17 +346,31 @@ KET QUA: 18/18 test PASS | 0 FAIL
 
 #### 🔝 Testbench Top-level — Tích hợp toàn hệ thống
 
+Để kiểm tra toàn bộ hệ thống, hãy chọn lệnh phù hợp với hệ điều hành của bạn:
+
+**🍎 Đối với macOS / Linux:**
 ```bash
 # Biên dịch toàn bộ
-iverilog -o sim_top -s tb_emergency_system */*.v
+iverilog -o emergency_system -s tb_emergency_system */*.v
 
-# Chạy
-vvp sim_top
+# Chạy mô phỏng
+vvp emergency_system
 
-# Xem sóng
+# Xem dạng sóng (waveform)
 gtkwave wave.vcd
 ```
 
+**🪟 Đối với Windows (PowerShell):**
+```bash
+# Biên dịch toàn bộ
+iverilog -o emergency_system -s tb_emergency_system -y a_h_n -y d_n_b -y n_m_d -y d_t_l_a d_t_l_a/tb_emergency_system.v
+
+# Chạy mô phỏng
+vvp emergency_system
+
+# Xem dạng sóng (waveform)
+gtkwave wave.vcd
+```
 ---
 
 ### 4. Xem biểu đồ sóng trong GTKWave
